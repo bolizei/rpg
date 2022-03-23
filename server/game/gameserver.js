@@ -11,20 +11,20 @@ const log = new logger()
 
 export default class gameserver {
     constructor() {
+        console.log('#######################################')
         this.setupNetwork()
         this.setupDatabase()
         this.players = []
         this.levels = []
     }
 
-
     setupDatabase() {
         log.log(0, 'connecting to database')
         this.connection = mysql.createConnection({
-            host: 'localhost',
-            user: 'root',
-            password: '',
-            database: 'rpg'
+            host: settings.sql.host,
+            user: settings.sql.user,
+            password: settings.sql.password,
+            database: settings.sql.database
         })
         this.connection.connect((error) => {
             if(error)
@@ -38,7 +38,6 @@ export default class gameserver {
     setupNetwork() {        
         log.log(0, 'starting gameserver')
         this.app = express()
-        log.log(0, 'starting webserver')
         this.httpserver = http.createServer(this.app)
         this.socketserver = new Server(this.httpserver, {
             cors: {
@@ -46,7 +45,7 @@ export default class gameserver {
             }
         })
         this.httpserver.listen(settings.listen_port, () => {
-            log.log(0, 'web server is listening on', settings.listen_port)
+            log.log(0, 'server is listening on', settings.listen_port)
         })
         this.setupNetworkHandlers()
     }
@@ -71,10 +70,13 @@ export default class gameserver {
             log.log(-1, 'data',  player.socket.id, ...data)
         })
         player.socket.on('r', (...data) => {
-            log.log(-1, 'request',  player.socket.id, ...data)
+            log.log(-1, 'register',  player.socket.id, ...data)
         })
         player.socket.on('u', (...data) => {
             log.log(-1, 'update',  player.socket.id, ...data)
+        })       
+        player.socket.on('l', (...data) => {
+            log.log(-1, 'login',  player.socket.id, ...data)
         })       
         player.socket.on('disconnect', (...data) => {
             log.log(-1, 'disonnect',  player.socket.id, ...data)
@@ -83,6 +85,9 @@ export default class gameserver {
         })       
     }
 
+    loginUser(socket, name, hash) {
+        
+    }
 
     getPlayerBySocket(socket) {
         for(const p in this.players) 
