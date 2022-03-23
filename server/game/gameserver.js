@@ -58,9 +58,9 @@ export default class gameserver {
 
     connectPlayer(socket) {
         log.log(0, 'player connected')
-        let newplayer = new player('name', socket)
+        let newplayer = new player('anon', socket)
         newplayer.connected = true            
-        this.addPlayer(newplayer)
+        //this.addPlayer(newplayer)
         this.setupPlayerNetworkHandlers(newplayer)    
     }
 
@@ -75,8 +75,8 @@ export default class gameserver {
         player.socket.on('u', (...data) => {
             log.log(-1, 'update',  player.socket.id, ...data)
         })       
-        player.socket.on('l', (...data) => {
-            log.log(-1, 'login',  player.socket.id, ...data)
+        player.socket.on('l', (data) => {
+            this.loginUser(player, data.name, data.hash)
         })       
         player.socket.on('disconnect', (...data) => {
             log.log(-1, 'disonnect',  player.socket.id, ...data)
@@ -85,8 +85,44 @@ export default class gameserver {
         })       
     }
 
-    loginUser(socket, name, hash) {
-        
+    loginUser(p, name, hash) {
+        // check hash against hash in database
+        log.log(-1, name, hash)
+        const query = `SELECT hash FROM user WHERE name = "${name}"`
+        const r = this.connection.query(query, (error, rows, fields) => {
+            if(rows.length == 0) {
+                log.log(0, 'User not found', name)
+                p.socket.emit('d', {
+                    'action': 'login',
+                    'success': false,
+                    'msg': 'User not found'
+                })
+                p.registered = false
+            }
+            else
+                if(rows[0].hash == hash) {
+                    log.log(0, 'User found and hash matched', name, hash)
+                    p.socket.emit('d', {
+                        'action': 'login',
+                        'success': true,
+                        'msg': 'User found and hash matched'
+                    })
+                    p.registered = true
+                    p.name = name
+                    p.hash = hash
+                    this.addPlayer(p)
+                } else {
+                    p.socket.emit('d', {
+                        'action': 'login',
+                        'success': false,
+                        'msg': 'User found but hash bot matched'
+                    })
+                    log.log(0, 'User found but hash not matched', name, hash)
+                    p.registered = false
+                }
+        })
+
+        /**/
     }
 
     getPlayerBySocket(socket) {

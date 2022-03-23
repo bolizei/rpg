@@ -4,5 +4,6 @@ export default class player {
         this.socket = socket
         this.registered = false
         this.connected = false
+        this.hash = null
     }
 }

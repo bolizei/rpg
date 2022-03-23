@@ -1,17 +1,36 @@
-document.getElementById('loginbutton').addEventListener("click", () => {
-    const hash = sha256(document.getElementById("loginname").value)
-    socket.emit('d', 'ICH WILL MICH EINLOGGEN!', hash)
-})
-
-const game = new PIXI.Application();
-document.body.appendChild(game.view);
-
+let logged = false;
 const socket = io("ws://172.30.120.2:1337");
 
+if(!logged) {
+    // hide game, show login
+    $('#login').css('display','block')
+    $('#main').css('display','none')
 
-game.ticker.add(() => {
+    // attach functionality to login form
+    $('#loginBtn').click(() => {
+        // send logindata to server
+        // but only send hash of pw
+        socket.emit('l', {
+            'name': document.getElementById("loginName").value, 
+            'hash': sha256(document.getElementById("loginPass").value)
+        })
+    })
 
-})
+    // when login succeeds
+    socket.on('d', (data) => {
+        if(data.action == 'login' && data.success) {
+            // hide login screen
+            $('#login').hide()
+            $('#main').show()
+            // start game
+            const game = new PIXI.Application();
+            $('#main').append(game.view)
+            logged = true
+        } else {
+            $('#modalerror').modal('show')
+        }
+    })
+} 
 
 var sha256 = function sha256(ascii) {
     function rightRotate(value, amount) {
