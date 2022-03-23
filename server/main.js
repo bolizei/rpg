@@ -1,18 +1,5 @@
-const express = require('express');
-const app = express();
-const http = require('http');
-const HTTPserver = http.createServer(app);
-const { Server } = require("socket.io");
-const io = new Server(HTTPserver, {
-    cors: {
-        origin: '*'
-    }
-});
+// todo: import settings here and register with gs
 
-io.on('connection', (socket) => {
-    console.log('a user connected');
-});
-
-HTTPserver.listen(1337, () => {
-    console.log('listening on *:3000 sdsd');
-});
+// launch gameserver
+import gameserver from "./game/gameserver.js";
+const gs = new gameserver()

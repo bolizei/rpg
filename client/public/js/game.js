@@ -1,41 +1,13 @@
-const app = new PIXI.Application();
-document.body.appendChild(app.view);
+document.getElementById('loginbutton').addEventListener("click", (event) => {
+    socket.emit('d', 'ICH WILL MICH EINLOGGEN!', document.getElementById('loginname').value)
+})
 
-/*
-app.loader.add('bunny', 'bunny.png').load((loader, resources) => {
-    const bunny = new PIXI.Sprite(resources.bunny.texture);
+const game = new PIXI.Application();
+document.body.appendChild(game.view);
 
-    bunny.x = app.renderer.width / 2;
-    bunny.y = app.renderer.height / 2;
-
-    bunny.anchor.x = 0.5;
-    bunny.anchor.y = 0.5;
-
-    app.stage.addChild(bunny);
-
-    app.ticker.add(() => {
-        bunny.rotation += 0.01;
-    });
-});
-*/
-const socket = io("ws://localhost:1337");
-
-// send a message to the server
-socket.emit("hello from client", 5, "6", { 7: Uint8Array.from([8]) });
-
-// receive a message from the server
-socket.on("hello from server", (...args) => {
-  console.log('hahaha')
-});
+const socket = io("ws://172.30.120.2:1337");
 
 
-// establish connection
-// load map, textures
-// sync with gameserver
+game.ticker.add(() => {
 
-// capture mouse/keyboard
-// loop
-
-/*
-app.ticker.add(() => {
-})*/
+})
