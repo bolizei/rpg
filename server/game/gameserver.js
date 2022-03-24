@@ -6,16 +6,34 @@ import express from 'express'
 import http from 'http'
 import {Server} from 'socket.io'
 import mysql from 'mysql'
+import os from 'os'
 
 const log = new logger()
 
 export default class gameserver {
     constructor() {
         console.log('#######################################')
+        log.log(0, 'starting server')
         this.setupNetwork()
         this.setupDatabase()
         this.players = []
         this.levels = []
+    }
+
+    getNetworkInterface() {
+        const nets = os.networkInterfaces()
+        const results = []
+        for(const name of Object.keys(nets)) {
+            for(const net of nets[name]) {
+                if(net.family === 'IPv4' && !net.internal) {
+                    results.push(net.address)
+                }
+            }
+        }
+
+        // settings defines which ethernet adapter we are using
+        settings.ip_address = results[settings.ethernet_adapter]
+        log.log(0, 'selecting ethernet adapter', settings.ethernet_adapter, settings.ip_address)
     }
 
     setupDatabase() {
@@ -36,7 +54,8 @@ export default class gameserver {
     }
 
     setupNetwork() {        
-        log.log(0, 'starting gameserver')
+        log.log(0, 'starting netserver')
+        this.getNetworkInterface()        
         this.app = express()
         this.httpserver = http.createServer(this.app)
         this.socketserver = new Server(this.httpserver, {
@@ -45,7 +64,7 @@ export default class gameserver {
             }
         })
         this.httpserver.listen(settings.listen_port, () => {
-            log.log(0, 'server is listening on', settings.listen_port)
+            log.log(0, 'server is listening on', settings.ip_address + ':' + settings.listen_port)
         })
         this.setupNetworkHandlers()
     }
@@ -60,7 +79,6 @@ export default class gameserver {
         log.log(0, 'player connected')
         let newplayer = new player('anon', socket)
         newplayer.connected = true            
-        //this.addPlayer(newplayer)
         this.setupPlayerNetworkHandlers(newplayer)    
     }
 
@@ -69,19 +87,20 @@ export default class gameserver {
         player.socket.on('d', (...data) => {
             log.log(-1, 'data',  player.socket.id, ...data)
         })
-        player.socket.on('r', (...data) => {
-            log.log(-1, 'register',  player.socket.id, ...data)
+        player.socket.on('r', (data) => {
+            log.log(-1, 'register',  player.socket.id, data)
+            this.registerPlayer(player, data)
         })
         player.socket.on('u', (...data) => {
             log.log(-1, 'update',  player.socket.id, ...data)
         })       
         player.socket.on('l', (data) => {
+            log.log(-1, 'login',  player.socket.id, data)
             this.loginUser(player, data.name, data.hash)
         })       
         player.socket.on('disconnect', (...data) => {
             log.log(-1, 'disonnect',  player.socket.id, ...data)
             this.removePlayerFromPool(player)
-            //this.getPlayerBySocket(player.socket).connected = false
         })       
     }
 
@@ -110,6 +129,7 @@ export default class gameserver {
                     p.registered = true
                     p.name = name
                     p.hash = hash
+                    // add user to pool
                     this.addPlayer(p)
                 } else {
                     p.socket.emit('d', {

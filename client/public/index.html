@@ -20,7 +20,11 @@
 							<label for="loginPass" class="form-label">Password</label>
 							<input type="password" class="form-control" id="loginPass">
 						</div>
-						<button type="submit" class="btn btn-primary" id="loginBtn">Submit</button>
+						<div class="mb-3">
+							<button type="submit" class="btn btn-primary" id="loginBtn">Submit</button>
+							<button type="submit" class="btn btn-secondary" id="registerBtn">Register</button>							
+						</div>
+						
 					</form>	
 				</div>
 			  </div>
@@ -40,6 +44,7 @@
 				</div>
 				<div class="modal-body">
 				  <p>Something went wrong</p>
+				  <p id="mdl-message"></p>
 				</div>
 				<div class="modal-footer">
 				  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>

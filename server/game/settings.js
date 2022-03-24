@@ -6,5 +6,6 @@ export default {
         user: 'root',
         password: '',
         database: 'rpg'
-    }
+    },
+    ethernet_adapter: 1
 }
