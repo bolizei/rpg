@@ -60,7 +60,7 @@ export default class gameserver {
         this.httpserver = http.createServer(this.app)
         this.socketserver = new Server(this.httpserver, {
             cors: {
-                origin: 'http://172.30.120.2:3000'
+                origin: 'http://172.30.120.2:8080'
             }
         })
         this.httpserver.listen(settings.listen_port, () => {
@@ -86,7 +86,7 @@ export default class gameserver {
         log.log(0, 'setting up network handlers for player', player.socket.id)
         player.socket.on('d', (data) => {
             log.log(-1, 'data',  player.socket.id, data)
-            handleData(player, data)
+            this.handleData(player, data)
         })
         player.socket.on('r', (data) => {
             log.log(-1, 'register',  player.socket.id, data)
@@ -123,7 +123,6 @@ export default class gameserver {
             'values': values
         })
     }
-
 
     handleData(player, data) {
         if(data.action == 'request') 
