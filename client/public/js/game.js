@@ -16,6 +16,23 @@ if(!logged) {
         })
     })
 
+    $('#registerBtn').click(() => {
+        // check if username and password are filled out
+        if($('loginName').value == '' || $('loginPass').value == '') {
+            $('#modalerror').modal('show')
+            $('#mdl-message').text('Fill out all fields')
+            return
+        } 
+
+        // PAUS!!! :D
+
+        // else we send data to server and wait for response
+        socket.emit('r', {
+            'name': document.getElementById("loginName").value, 
+            'hash': sha256(document.getElementById("loginPass").value)
+        })
+    })
+
     // when login succeeds
     socket.on('d', (data) => {
         if(data.action == 'login' && data.success) {
@@ -28,6 +45,7 @@ if(!logged) {
             logged = true
         } else {
             $('#modalerror').modal('show')
+            $('#mdl-message').text('asasasasas')
         }
     })
 } 
