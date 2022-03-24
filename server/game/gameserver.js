@@ -104,11 +104,67 @@ export default class gameserver {
         })       
     }
 
+    // already callback hell
+    // need to refactor this anyway
+
+    registerPlayer(player, data) {
+        this.connection.query( `SELECT * FROM user WHERE name = '${data.name}'`, (error, rows) => {
+            if(error) {
+                log.log(0, 'sql error while registering player', error)
+                player.socket.emit('d', {
+                    'action': 'register',
+                    'success': false,
+                    'msg': 'sql error: ' + error
+                })   
+                return
+            }
+            if(rows.length == 0) {
+                // username not yet used
+                log.log(0, 'username available', data.name)
+                this.connection.query(`INSERT INTO user (name, hash) VALUES ("${data.name}", "${data.hash}")`, (error, rows) => {
+                    if(error) {
+                        log.log(0, 'sql error while registering player', error)
+                        player.socket.emit('d', {
+                            'action': 'register',
+                            'success': false,
+                            'msg': 'sql error: ' + error
+                        })   
+                        return
+                    }
+
+                    log.log(0, 'user registered', data.name)
+                    player.socket.emit('d', {
+                        'action': 'register',
+                        'success': true
+                    }) 
+                    this.loginUser(player, data.name, data.hash)
+                });
+            } else {
+                // username already in use
+                log.log(0, 'username already taken', data.name)
+                player.socket.emit('d', {
+                    'action': 'register',
+                    'success': false,
+                    'msg': 'username already taken'
+                })                
+            }
+        })
+    }
+
     loginUser(p, name, hash) {
         // check hash against hash in database
         log.log(-1, name, hash)
         const query = `SELECT hash FROM user WHERE name = "${name}"`
-        const r = this.connection.query(query, (error, rows, fields) => {
+        this.connection.query(query, (error, rows) => {
+            if(error) {
+                log.log(0, 'SQL ERROR', error)
+                p.socket.emit('d', {
+                    'action': 'login',
+                    'success': false,
+                    'msg': 'sql error: ' + error
+                })
+                return
+            }
             if(rows.length == 0) {
                 log.log(0, 'User not found', name)
                 p.socket.emit('d', {

@@ -11,41 +11,62 @@ if(!logged) {
         // send logindata to server
         // but only send hash of pw
         socket.emit('l', {
-            'name': document.getElementById("loginName").value, 
-            'hash': sha256(document.getElementById("loginPass").value)
+            'name': $("#loginName").val(), 
+            'hash': sha256($("#loginPass").val())
         })
     })
 
     $('#registerBtn').click(() => {
         // check if username and password are filled out
-        if($('loginName').value == '' || $('loginPass').value == '') {
+        if($('#loginName').val() == '' || $('#loginPass').val() == '') {
             $('#modalerror').modal('show')
             $('#mdl-message').text('Fill out all fields')
             return
         } 
 
-        // PAUS!!! :D
 
         // else we send data to server and wait for response
         socket.emit('r', {
-            'name': document.getElementById("loginName").value, 
-            'hash': sha256(document.getElementById("loginPass").value)
+            'name': $("#loginName").val(), 
+            'hash': sha256($("#loginPass").val())
         })
+
+        // show waiting modal
+        $("#modalwaiting").modal({
+            backdrop: 'static',
+            keyboard: false
+        }).show()
     })
 
     // when login succeeds
     socket.on('d', (data) => {
-        if(data.action == 'login' && data.success) {
-            // hide login screen
-            $('#login').hide()
-            $('#main').show()
-            // start game
-            const game = new PIXI.Application();
-            $('#main').append(game.view)
-            logged = true
-        } else {
-            $('#modalerror').modal('show')
-            $('#mdl-message').text('asasasasas')
+        if(data.action == 'login') {
+            if(data.success) {
+                // hide login screen
+                $('#modalwaiting').modal('hide').hide()
+                $('#modalerror').modal('hide').hide()
+                $('#login').hide()
+                $('#main').show()
+
+                // start game
+                const game = new PIXI.Application();
+                $('#main').append(game.view)
+                logged = true
+            } else {
+                $('#modalerror').modal('show')
+                $('#mdl-message').text('Login failed')
+            }
+        } else if(data.action == 'register') {
+            $('#modalwaiting').modal('hide')
+            $('#modalerror').modal('hide').hide()
+            if(data.success) {
+                $('#modalerror').modal('show')
+                $('#mdl-message').text('Register failed successfully :D:D:D')
+            } else {
+                $('#modalerror').modal('show')
+                $('#mdl-message').text('Register failed')
+
+            }
         }
     })
 } 
