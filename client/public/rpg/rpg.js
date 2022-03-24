@@ -1,6 +1,18 @@
 let logged = false;
 const socket = io("ws://172.30.120.2:1337");
 
+// NEXT STEP: refactor client
+// build encapsulated gameclasses
+// integrate pixi
+// build html interface where its needed
+// session/cookie logic
+
+
+
+
+
+
+
 if(!logged) {
     // hide game, show login
     $('#login').css('display','block')

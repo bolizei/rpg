@@ -84,8 +84,9 @@ export default class gameserver {
 
     setupPlayerNetworkHandlers(player) {
         log.log(0, 'setting up network handlers for player', player.socket.id)
-        player.socket.on('d', (...data) => {
-            log.log(-1, 'data',  player.socket.id, ...data)
+        player.socket.on('d', (data) => {
+            log.log(-1, 'data',  player.socket.id, data)
+            handleData(player, data)
         })
         player.socket.on('r', (data) => {
             log.log(-1, 'register',  player.socket.id, data)
@@ -104,9 +105,39 @@ export default class gameserver {
         })       
     }
 
+    handleDataRequest(player, data) {
+        false && log.log(0, 'data request', player)
+        let values
+        if(data.subject == 'levels') {
+
+        } else if(data.subject == 'players') {
+            values = this.players.slice(this.players.length - 1)
+        } else if(data.subject == 'profile') {
+            values = {'name': player.name}
+        } else if(data.subject == 'ownstate') {
+            values = {'state': 'default'}
+        } 
+
+        player.socket.emit('d', {
+            'subject': data.subject,
+            'values': values
+        })
+    }
+
+
+    handleData(player, data) {
+        if(data.action == 'request') 
+            handleDataRequest(player, data)
+        else if(data.action == 'push') 
+            handleDataPush(player, data)
+        else
+            log.log(0, 'error', 'datapackage not correctly formed. missing method', data)
+    }
+
+
     // already callback hell
     // need to refactor this anyway
-
+    // also no sql sanitizing
     registerPlayer(player, data) {
         this.connection.query( `SELECT * FROM user WHERE name = '${data.name}'`, (error, rows) => {
             if(error) {
