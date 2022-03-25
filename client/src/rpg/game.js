@@ -3,6 +3,7 @@ import ui from './game/ui.js'
 import log from './lib/logger.js'
 import network from './game/network.js'
 import graphics from './game/graphics.js'
+import events from './game/events.js'
 export default class game {
     constructor() {
         // setup network
@@ -10,11 +11,21 @@ export default class game {
         // setup UI
         this._ui = new ui(this)
         // setup graphics
-        this._graphics = new graphics(this);
+        this._graphics = new graphics(this)
+        // setup events
+        this._events = new events(this)
+        // setup player
+        this._player = new player(this)    
+
+        this._graphics.startLoop()
+
+        
+
+
+
 
         // where do i put these?
         this._gamestate = 0
-        this.player = new player(this)    
         this.run()
 
         // this object connects network input/output with the graphical representation
