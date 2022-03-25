@@ -2,7 +2,8 @@ import {io} from 'socket.io-client'
 import log from '../lib/logger.js'
 
 export default class network {
-    constructor() {
+    constructor(game) {
+        this._game = game;
         this._socket = io("ws://172.30.120.2:1337")
         this.setupInputBuffer()        
     }

@@ -10,6 +10,8 @@ module.exports = {
     plugins: [
         new CleanWebpackPlugin(),
         new HtmlWebpackPlugin({
+            template: 'src/index.html',
+            hash: true,
             title: 'Game!'
         }),
         new CopyPlugin({
@@ -20,11 +22,21 @@ module.exports = {
     ],
     module: {
         rules: [
-            {test: /\.css$/,
+            {
+                test: /\.css$/,
                 use: [
                     'style-loader',
-                    'css-loader'
-                ]}
+                    'css-loader',
+                ]
+            },
+            {
+                test: /\.s[ac]ss$/i,
+                use: [
+                  "style-loader",
+                  "css-loader",
+                  "sass-loader",
+                ],
+              }
         ]
     },
     output: {
